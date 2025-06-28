@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Register Store</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="register-body">
+  <div class="register-container">
+    <h2>Register Your Store</h2>
+    <form method="POST" action="/register">
+      <label for="store_id">Store ID</label>
+      <input type="text" name="store_id" required>
+
+      <label for="password">Password</label>
+      <input type="password" name="password" required>
+
+      <button type="submit">Register</button>
+    </form>
+    <p style="margin-top: 15px;">Already registered? <a href="/">Login here</a></p>
+  </div>
+</body>
+</html>
