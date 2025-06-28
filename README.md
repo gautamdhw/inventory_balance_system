@@ -23,7 +23,4 @@ A simple inventory dashboard allowing store admins to upload inventory & sales d
 - **File Handling**: CSV Upload
 - **ML Ready**: Prepped for future integration
 
----
-
-## 📂 Folder Structure
 
