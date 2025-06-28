@@ -1,0 +1,4 @@
+# .gitignore
+uploads/
+__pycache__/
+.env

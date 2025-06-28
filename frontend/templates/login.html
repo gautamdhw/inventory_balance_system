@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Inventory | Login</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="login-body">
+  <div class="login-container">
+    <h2>🛒 Store Admin Login</h2>
+    <form action="/login" method="POST">
+      <label for="store_id">Store ID</label>
+      <input type="text" id="store_id" name="store_id" required placeholder="Enter your Store ID">
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required placeholder="Enter password">
+
+      <button type="submit">Login</button>
+    </form>
+  </div>
+</body>
+</html>
