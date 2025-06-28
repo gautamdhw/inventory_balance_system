@@ -1,6 +1,6 @@
 from flask import Flask, request, session, redirect, render_template, render_template_string
 from werkzeug.security import generate_password_hash, check_password_hash
-from db import inventory_collection, store_admins_collection
+from db import inventory_collection, store_admins_collection,sales_collection
 import os
 import pandas as pd
 from werkzeug.utils import secure_filename
@@ -39,11 +39,11 @@ def login():
     password = request.form["password"]
 
     user = store_admins_collection.find_one({"store_id": store_id})
-    if not user or not check_password_hash(user["password"], password):
-        return "Invalid credentials"
-
-    session["store_id"] = store_id
-    return redirect("/dashboard")
+    if user and check_password_hash(user["password"], password):
+        session["store_id"] = store_id
+        return redirect("/dashboard")
+    else:
+        return "Invalid store ID or password"
 
 
 @app.route("/dashboard")
@@ -52,13 +52,21 @@ def dashboard():
         return redirect("/")
 
     store_id = session["store_id"]
+
+    # Inventory data
     records = list(inventory_collection.find({"store_id": store_id}))
     table_rows = ""
     for item in records:
         table_rows += f"<tr><td>{item.get('item_id')}</td><td>{item.get('product')}</td><td>{item.get('stock')}</td></tr>"
 
-    # ✅ send values via render_template
-    return render_template("index.html", store_id=store_id, table_rows=table_rows)
+    # Sales data
+    sales_records = list(sales_collection.find({"store_id": store_id}))
+    sales_rows = ""
+    for sale in sales_records:
+        sales_rows += f"<tr><td>{sale.get('date')}</td><td>{sale.get('item_id')}</td><td>{sale.get('product')}</td><td>{sale.get('quantity')}</td></tr>"
+
+    return render_template("index.html", store_id=store_id, table_rows=table_rows, sales_rows=sales_rows)
+
 
 @app.route("/api/inventory/upload", methods=["POST"])
 def upload_inventory():
@@ -78,6 +86,26 @@ def upload_inventory():
     inventory_collection.insert_many(df.to_dict(orient="records"))
 
     return redirect("/dashboard")
+
+@app.route("/api/sales/upload", methods=["POST"])
+def upload_sales():
+    if "store_id" not in session:
+        return redirect("/")
+
+    file = request.files["file"]
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(UPLOAD_FOLDER, filename)
+    file.save(filepath)
+
+    df = pd.read_csv(filepath)
+    df["store_id"] = session["store_id"]  # tag the store
+
+    # Optionally clean previous sales data for that store
+    sales_collection.delete_many({"store_id": session["store_id"]})
+    sales_collection.insert_many(df.to_dict(orient="records"))
+
+    return redirect("/dashboard")
+
 
 @app.route("/logout")
 def logout():
