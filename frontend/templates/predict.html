@@ -12,6 +12,7 @@
     <div class="sidebar">
       <h2>📦 Store ID: {{ store_id }}</h2>
       <a href="/dashboard">🏠 Dashboard</a>
+      <a href="/update-inventory">📝 Update Inventory</a>
       <a href="/predict-page">🔮 Predict Demand</a>
       <a href="/logout">🚪 Logout</a>
     </div>
@@ -45,7 +46,7 @@
           </tbody>
         </table>
       </section>
-    {% endif %}
+      {% endif %}
 
       <form action="/transfer-suggestions" method="POST">
         <button type="submit">📤 Show Transfer Suggestions</button>

@@ -203,11 +203,71 @@ def transfer_suggestions():
     prediction_rows = ""
     current_predictions = prediction_collection.find({"store_id": store_id})
     for p in current_predictions:
-        prediction_rows += f"<tr><td>{p['item_id']}</td><td>{p['start_date']}</td><td>{p['end_date']}</td><td>{p['predicted_quantity']}</td><td>{p['current_stock']}</td><td>{p['difference']}</td><td>{p['status']}</td></tr>"
+        diff_abs = abs(p.get('difference', 0))
+        prediction_rows += f"<tr><td>{p['item_id']}</td><td>{p['start_date']}</td><td>{p['end_date']}</td><td>{p['predicted_quantity']}</td><td>{p['current_stock']}</td><td>{diff_abs}</td><td>{p['status']}</td></tr>"
 
     return render_template("predict.html", store_id=store_id, prediction_rows=prediction_rows, suggestion_rows=suggestion_rows)
 
 
+@app.route("/update-inventory")
+def update_inventory():
+    if "store_id" not in session:
+        return redirect("/")
+    
+    store_id = session["store_id"]
+    items = list(inventory_collection.find({"store_id": store_id}))
+    return render_template("update_inventory.html", store_id=store_id, inventory=items)
+
+
+@app.route("/inventory/add", methods=["POST"])
+def add_inventory():
+    if "store_id" not in session:
+        return redirect("/")
+    
+    item = {
+        "store_id": session["store_id"],
+        "item_id": request.form["item_id"],
+        "product": request.form["product"],
+        "stock": int(request.form["stock"])
+    }
+
+    existing = inventory_collection.find_one({
+        "store_id": session["store_id"],
+        "item_id": item["item_id"]
+    })
+
+    if existing:
+        return "Item already exists. Use update instead."
+
+    inventory_collection.insert_one(item)
+    return redirect("/update-inventory")
+
+
+@app.route("/inventory/update/<item_id>", methods=["POST"])
+def update_item(item_id):
+    if "store_id" not in session:
+        return redirect("/")
+
+    inventory_collection.update_one(
+        {"store_id": session["store_id"], "item_id": item_id},
+        {"$set": {
+            "product": request.form["product"],
+            "stock": int(request.form["stock"])
+        }}
+    )
+    return redirect("/update-inventory")
+
+
+@app.route("/inventory/delete/<item_id>")
+def delete_item(item_id):
+    if "store_id" not in session:
+        return redirect("/")
+
+    inventory_collection.delete_one({
+        "store_id": session["store_id"],
+        "item_id": item_id
+    })
+    return redirect("/update-inventory")
 
 
 

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Update Inventory</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    .form-inline {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .form-inline input {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      background-color: #4F46E5;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.2s ease;
+    }
+
+    .btn:hover {
+      background-color: #3730A3;
+    }
+
+    .table input {
+      width: 100%;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .table td, .table th {
+      padding: 10px;
+      text-align: center;
+    }
+
+    .delete-link {
+      color: #ef4444;
+      text-decoration: none;
+      margin-left: 10px;
+      font-weight: bold;
+    }
+
+    .delete-link:hover {
+      text-decoration: underline;
+    }
+
+    .card {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    .card h2 {
+      display: flex;
+      align-items: center;
+      font-size: 20px;
+      margin-bottom: 15px;
+    }
+
+    .card h2::before {
+      content: "🧾";
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body class="dashboard-layout">
+  <div class="sidebar">
+    <h2>🛒 Store ID: {{ store_id }}</h2>
+    <a href="/dashboard">🏠 Dashboard</a>
+    <a href="/update-inventory">📝 Update Inventory</a>
+    <a href="/logout">🚪 Logout</a>
+  </div>
+
+  <div class="main-content">
+    <header>
+      <h1>📝 Manage Inventory</h1>
+    </header>
+
+    <!-- Add Item -->
+    <section class="card">
+      <h2>➕ Add Item</h2>
+      <form class="form-inline" action="/inventory/add" method="POST">
+        <input type="text" name="item_id" placeholder="Item ID" required />
+        <input type="text" name="product" placeholder="Product Name" required />
+        <input type="number" name="stock" placeholder="Stock" required />
+        <button type="submit" class="btn">Add</button>
+      </form>
+    </section>
+
+    <!-- Inventory Table -->
+    <section class="card">
+      <h2>📦 Current Inventory</h2>
+      <table class="table" style="width: 100%; border-collapse: collapse;">
+        <thead style="background: #f4f4f4;">
+          <tr>
+            <th>Item ID</th>
+            <th>Product</th>
+            <th>Stock</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in inventory %}
+          <tr>
+            <form action="/inventory/update/{{ item.item_id }}" method="POST">
+              <td>{{ item.item_id }}</td>
+              <td><input type="text" name="product" value="{{ item.product }}" required></td>
+              <td><input type="number" name="stock" value="{{ item.stock }}" required></td>
+              <td>
+                <button type="submit" class="btn">Update</button>
+                <a href="/inventory/delete/{{ item.item_id }}" class="delete-link" onclick="return confirm('Delete this item?');">Delete</a>
+              </td>
+            </form>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </div>
+</body>
+</html>
