@@ -165,6 +165,49 @@ def predict():
     return render_template("predict.html", store_id=store_id, prediction_rows=prediction_rows)
 
 
+@app.route("/transfer-suggestions", methods=["POST"])
+def transfer_suggestions():
+    if "store_id" not in session:
+        return redirect("/")
+
+    store_id = session["store_id"]
+    all_predictions = list(prediction_collection.find({}))
+    suggestions = []
+
+    items = set(p["item_id"] for p in all_predictions)
+
+    for item in items:
+        shortages = [p for p in all_predictions if p["item_id"] == item and p.get("status", "").lower() == "shortage"]
+        surpluses = [p for p in all_predictions if p["item_id"] == item and p.get("status", "").lower() == "surplus"]
+
+        for shortage in shortages:
+            for surplus in surpluses:
+                if shortage["store_id"] != surplus["store_id"]:
+                    qty = min(abs(shortage["difference"]), abs(surplus["difference"]))
+                    if qty > 0:
+                        # ✅ Only add suggestion if current user is involved
+                        if store_id in [shortage["store_id"], surplus["store_id"]]:
+                            suggestions.append({
+                                "item_id": item,
+                                "from_store": surplus["store_id"],
+                                "to_store": shortage["store_id"],
+                                "quantity": qty
+                            })
+
+    # Convert to HTML
+    suggestion_rows = ""
+    for s in suggestions:
+        suggestion_rows += f"<tr><td>{s['item_id']}</td><td>{s['from_store']}</td><td>{s['to_store']}</td><td>{s['quantity']}</td></tr>"
+
+    # Re-fetch this store's predictions
+    prediction_rows = ""
+    current_predictions = prediction_collection.find({"store_id": store_id})
+    for p in current_predictions:
+        prediction_rows += f"<tr><td>{p['item_id']}</td><td>{p['start_date']}</td><td>{p['end_date']}</td><td>{p['predicted_quantity']}</td><td>{p['current_stock']}</td><td>{p['difference']}</td><td>{p['status']}</td></tr>"
+
+    return render_template("predict.html", store_id=store_id, prediction_rows=prediction_rows, suggestion_rows=suggestion_rows)
+
+
 
 
 

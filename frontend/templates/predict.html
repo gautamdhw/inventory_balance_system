@@ -45,6 +45,29 @@
           </tbody>
         </table>
       </section>
+    {% endif %}
+
+      <form action="/transfer-suggestions" method="POST">
+        <button type="submit">📤 Show Transfer Suggestions</button>
+      </form>
+
+      {% if suggestion_rows %}
+      <section class="card full" style="margin-top: 20px">
+        <h2>🔁 Transfer Suggestions</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Item ID</th>
+              <th>From Store</th>
+              <th>To Store</th>
+              <th>Suggested Quantity</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{ suggestion_rows | safe }}
+          </tbody>
+        </table>
+      </section>
       {% endif %}
     </div>
   </body>
