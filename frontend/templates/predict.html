@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Predict Demand</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+  </head>
+  <body class="dashboard-layout">
+    <div class="sidebar">
+      <h2>📦 Store ID: {{ store_id }}</h2>
+      <a href="/dashboard">🏠 Dashboard</a>
+      <a href="/predict-page">🔮 Predict Demand</a>
+      <a href="/logout">🚪 Logout</a>
+    </div>
+
+    <div class="main-content">
+      <header>
+        <h1>🔮 Predict Weekly Demand</h1>
+      </header>
+
+      <form action="/predict" method="POST">
+        <button type="submit">📈 Generate Predictions</button>
+      </form>
+
+      {% if prediction_rows %}
+      <section class="card full" style="margin-top: 20px">
+        <h2>📅 Predicted Demand (Next 7 Days)</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Item ID</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Predicted Quantity</th>
+              <th>Current Stock</th>
+              <th>Difference</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{ prediction_rows | safe }}
+          </tbody>
+        </table>
+      </section>
+      {% endif %}
+    </div>
+  </body>
+</html>
